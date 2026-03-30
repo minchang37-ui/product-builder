@@ -62,13 +62,12 @@
                 <p class="subtitle">지도를 움직여 위치를 정하고 음식점을 추천받으세요.</p>
             </header>
 
-            <div id="map-container" style="display: flex; justify-content: center; margin-bottom: 25px; position: relative;">
-                <!-- 카카오 가이드 표준: 500x400 크기 -->
-                <div id="map" style="width:500px;height:400px;"></div>
-                <div class="map-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10;">
+            <div id="map-container">
+                <div id="map"></div>
+                <div class="map-overlay">
                     <span class="center-marker">📍</span>
                 </div>
-                <button id="get-location-btn" class="map-btn" style="right: calc(50% - 240px); bottom: 10px;" title="내 위치로 이동">🎯</button>
+                <button id="get-location-btn" class="map-btn" title="내 위치로 이동">🎯</button>
             </div>
 
             <div class="controls restaurant-controls">
