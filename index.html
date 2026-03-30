@@ -7,11 +7,8 @@
     <meta name="description" content="행운의 로또 번호 추출과 주변 맛집 추천을 한곳에서!">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <!-- 카카오맵 API (가이드에 따라 https와 autoload=false 적용) -->
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ec7f8ba3dc6e9e439ea37b1ce4b17827&libraries=services&autoload=false"></script>
 </head>
 <body>
-... (rest of code) ...
 
 <nav class="navbar">
     <div class="nav-container">
@@ -65,12 +62,13 @@
                 <p class="subtitle">지도를 움직여 위치를 정하고 맛집을 추천받으세요.</p>
             </header>
 
-            <div id="map-container">
-                <div id="map"></div>
-                <div class="map-overlay">
+            <div id="map-container" style="display: flex; justify-content: center; margin-bottom: 25px; position: relative;">
+                <!-- 카카오 가이드 표준: 500x400 크기 -->
+                <div id="map" style="width:500px;height:400px;"></div>
+                <div class="map-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10;">
                     <span class="center-marker">📍</span>
                 </div>
-                <button id="get-location-btn" class="map-btn" title="내 위치로 이동">🎯</button>
+                <button id="get-location-btn" class="map-btn" style="right: calc(50% - 240px); bottom: 10px;" title="내 위치로 이동">🎯</button>
             </div>
 
             <div class="controls restaurant-controls">
@@ -113,6 +111,8 @@
     </div>
 </main>
 
+<!-- 카카오맵 API 가이드 표준 방식 (상대 프로토콜 사용) -->
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ec7f8ba3dc6e9e439ea37b1ce4b17827&libraries=services"></script>
 <script src="main.js"></script>
 
 </body>
