@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Restaurant Elements ---
     const recommendBtn = document.getElementById('recommend-btn');
-    const priceRangeSelect = document.getElementById('price-range');
+    const foodCategorySelect = document.getElementById('food-category');
     const mealTimeSelect = document.getElementById('meal-time');
     const restaurantResultContainer = document.getElementById('restaurant-result-container');
     const placeName = document.getElementById('place-name');
@@ -115,19 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return ball;
     }
 
-    // --- Kakao Map Logic (가이드 표준 코드 적용) ---
-    var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-    var options = { //지도를 생성할 때 필요한 기본 옵션
-        center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
-        level: 3 //지도의 레벨(확대, 축소 정도)
+    // --- Kakao Map Logic ---
+    var container = document.getElementById('map');
+    var options = {
+        center: new kakao.maps.LatLng(33.450701, 126.570667),
+        level: 3
     };
 
-    var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
-    
-    // 맛집 검색을 위한 서비스 객체 생성
+    var map = new kakao.maps.Map(container, options);
     var ps = new kakao.maps.services.Places(); 
 
-    // 내 위치 버튼 클릭 이벤트
     getLocationBtn.addEventListener('click', () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -141,36 +138,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Restaurant Recommendation Logic ---
     recommendBtn.addEventListener('click', () => {
-        const price = priceRangeSelect.value;
+        const foodType = foodCategorySelect.value;
         const time = mealTimeSelect.value;
-        const keyword = `${price} ${time}`.trim() || '맛집';
         const center = map.getCenter();
         
-        console.log(`검색 시작! 키워드: "${keyword}", 좌표: ${center.toString()}`);
-
+        let keyword = `${foodType} ${time}`.trim();
+        
         const searchOptions = {
             location: center,
-            radius: 2000, // 범위를 2km로 확장하여 더 많은 결과를 찾음
+            radius: 2000,
             sort: kakao.maps.services.SortBy.DISTANCE
         };
 
-        ps.keywordSearch(keyword, (data, status) => {
-            // 디버깅을 위해 결과 리스트를 콘솔에 출력
-            console.log('검색 상태:', status);
-            console.log('검색 결과 리스트:', data);
-
-            if (status === kakao.maps.services.Status.OK) {
-                console.log(`총 ${data.length}개의 맛집을 찾았습니다.`);
-                const randomIndex = Math.floor(Math.random() * data.length);
-                const place = data[randomIndex];
-                displayResult(place);
-            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-                alert(`"${keyword}" 조건에 맞는 장소를 찾지 못했습니다. 금액대나 시간을 '전체'로 설정하고 다시 시도해보세요.`);
-            } else {
-                alert('검색 중 오류가 발생했습니다.');
-            }
-        }, searchOptions);
+        // 특정 카테고리 로직 (카페의 경우 CE7 그룹 코드를 사용하면 더 정확함)
+        if (foodType === '카페') {
+            ps.categorySearch('CE7', (data, status) => {
+                handleSearchResults(data, status, '카페');
+            }, searchOptions);
+        } else {
+            // 일반 음식점 키워드 검색
+            ps.keywordSearch(keyword, (data, status) => {
+                handleSearchResults(data, status, keyword);
+            }, searchOptions);
+        }
     });
+
+    function handleSearchResults(data, status, keyword) {
+        console.log(`검색 완료 - 키워드: ${keyword}, 결과수: ${data ? data.length : 0}`);
+        
+        if (status === kakao.maps.services.Status.OK) {
+            const randomIndex = Math.floor(Math.random() * data.length);
+            displayResult(data[randomIndex]);
+        } else {
+            alert(`주변에 "${keyword}" 조건에 맞는 장소를 찾지 못했습니다.`);
+        }
+    }
 
     function displayResult(place) {
         placeName.textContent = place.place_name;
