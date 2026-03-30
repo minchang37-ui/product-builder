@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Restaurant Elements ---
     const recommendBtn = document.getElementById('recommend-btn');
     const foodCategorySelect = document.getElementById('food-category');
-    const mealTimeSelect = document.getElementById('meal-time');
+    const searchRadiusSelect = document.getElementById('search-radius');
     const restaurantResultContainer = document.getElementById('restaurant-result-container');
     const placeName = document.getElementById('place-name');
     const placeCategory = document.getElementById('place-category');
@@ -139,26 +139,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Restaurant Recommendation Logic ---
     recommendBtn.addEventListener('click', () => {
         const foodType = foodCategorySelect.value;
-        const time = mealTimeSelect.value;
+        const radius = parseInt(searchRadiusSelect.value);
         const center = map.getCenter();
-        
-        let keyword = `${foodType} ${time}`.trim();
         
         const searchOptions = {
             location: center,
-            radius: 2000,
+            radius: radius,
             sort: kakao.maps.services.SortBy.DISTANCE
         };
 
-        // 특정 카테고리 로직 (카페의 경우 CE7 그룹 코드를 사용하면 더 정확함)
-        if (foodType === '카페') {
+        // 1. 전체(FD6 그룹) 또는 카페(CE7 그룹)는 그룹 검색 사용
+        if (foodType === '전체') {
+            ps.categorySearch('FD6', (data, status) => {
+                handleSearchResults(data, status, '음식점');
+            }, searchOptions);
+        } else if (foodType === '카페') {
             ps.categorySearch('CE7', (data, status) => {
                 handleSearchResults(data, status, '카페');
             }, searchOptions);
         } else {
-            // 일반 음식점 키워드 검색
-            ps.keywordSearch(keyword, (data, status) => {
-                handleSearchResults(data, status, keyword);
+            // 2. 그 외 세부 카테고리는 키워드 검색 사용
+            ps.keywordSearch(foodType, (data, status) => {
+                handleSearchResults(data, status, foodType);
             }, searchOptions);
         }
     });
@@ -170,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const randomIndex = Math.floor(Math.random() * data.length);
             displayResult(data[randomIndex]);
         } else {
-            alert(`주변에 "${keyword}" 조건에 맞는 장소를 찾지 못했습니다.`);
+            alert(`주변 ${searchRadiusSelect.value}m 이내에 "${keyword}" 장소를 찾지 못했습니다. 범위를 넓혀보세요.`);
         }
     }
 
