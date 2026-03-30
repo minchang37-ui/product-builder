@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target === 'restaurant' && map) {
                 setTimeout(() => {
                     map.relayout();
-                    map.setCenter(new kakao.maps.LatLng(33.450701, 126.570667));
+                    // 현재 지도의 중심을 유지하거나 재설정
+                    map.setCenter(map.getCenter());
                 }, 100);
             }
         });
@@ -118,23 +119,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Kakao Map Logic ---
     var container = document.getElementById('map');
     var options = {
-        center: new kakao.maps.LatLng(33.450701, 126.570667),
+        center: new kakao.maps.LatLng(37.5665, 126.9780), // 초기 기본값: 서울시청
         level: 3
     };
 
     var map = new kakao.maps.Map(container, options);
     var ps = new kakao.maps.services.Places(); 
 
-    getLocationBtn.addEventListener('click', () => {
+    // 초기 위치 자동 파악 함수
+    function autoSetLocation() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                var moveLatLon = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                map.setCenter(moveLatLon);
-            }, () => {
-                alert('위치 정보를 가져올 수 없습니다.');
-            });
+            console.log('현재 위치를 파악 중입니다...');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const moveLatLon = new kakao.maps.LatLng(lat, lon);
+                    
+                    console.log(`위치 파악 성공: ${lat}, ${lon}`);
+                    map.setCenter(moveLatLon);
+                },
+                (err) => {
+                    console.warn(`위치 정보를 가져올 수 없습니다 (Error ${err.code}): ${err.message}`);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
         }
-    });
+    }
+
+    // 접속 시 즉시 실행
+    autoSetLocation();
+
+    // 내 위치 버튼 클릭 시에도 실행
+    getLocationBtn.addEventListener('click', autoSetLocation);
 
     // --- Restaurant Recommendation Logic ---
     recommendBtn.addEventListener('click', () => {
@@ -148,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sort: kakao.maps.services.SortBy.DISTANCE
         };
 
-        // 1. 전체(FD6 그룹) 또는 카페(CE7 그룹)는 그룹 검색 사용
         if (foodType === '전체') {
             ps.categorySearch('FD6', (data, status) => {
                 handleSearchResults(data, status, '음식점');
@@ -158,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleSearchResults(data, status, '카페');
             }, searchOptions);
         } else {
-            // 2. 그 외 세부 카테고리는 키워드 검색 사용
             ps.keywordSearch(foodType, (data, status) => {
                 handleSearchResults(data, status, foodType);
             }, searchOptions);
