@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky & Yummy - 멀티 도우미</title>
-    <meta name="description" content="행운의 로또 번호 추출과 주변 음식점 추천을 한곳에서!">
+    <title>Lucky & Yummy - 로또 번호 생성 및 주변 음식점 추천 가이드</title>
+    <meta name="description" content="무작위 로또 번호 생성 알고리즘과 카카오맵 기반 주변 음식점 추천 서비스를 제공합니다. 효율적인 번호 조합법과 맛집 선정 팁을 확인하세요.">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -12,7 +12,12 @@
 
 <nav class="navbar">
     <div class="nav-container">
-        <a href="#" class="nav-logo">Lucky & Yummy</a>
+        <a href="/" class="nav-logo">Lucky & Yummy</a>
+        <ul class="nav-menu">
+            <li><a href="#lotto-section">로또 생성기</a></li>
+            <li><a href="#restaurant-section">음식점 추천</a></li>
+            <li><a href="#info-section">사용 가이드</a></li>
+        </ul>
         <div class="nav-right">
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">🌙</button>
         </div>
@@ -22,16 +27,16 @@
 <main class="main-content">
     <div class="tab-container container">
         <div class="tabs">
-            <button class="tab-btn active" data-tab="lotto">🍀 로또 번호</button>
+            <button class="tab-btn active" data-tab="lotto">🍀 로또 번호 추출</button>
             <button class="tab-btn" data-tab="restaurant">🍴 음식점 추천</button>
         </div>
 
         <!-- 로또 섹션 -->
         <section id="lotto-section" class="tab-content active">
-            <header>
-                <h1>Lucky Lotto</h1>
-                <p class="subtitle">행운의 번호 조합을 만들어보세요.</p>
-            </header>
+            <div class="section-header">
+                <h1>행운의 로또 번호 생성기</h1>
+                <p class="subtitle">무작위 알고리즘을 활용한 번호 조합 도구입니다.</p>
+            </div>
 
             <div class="controls lotto-controls">
                 <label for="game-count">추출할 게임 수:</label>
@@ -45,22 +50,24 @@
             </div>
 
             <div id="lotto-result-container">
-                <!-- 로또 결과 동적 생성 -->
+                <!-- 결과 동적 생성 -->
             </div>
 
-            <button id="generate-btn">번호 생성하기</button>
+            <button id="generate-btn">지금 번호 생성하기</button>
             
-            <footer class="tab-footer">
-                <p>※ 본 프로그램은 무작위 번호 생성기이며 당첨을 보장하지 않습니다.</p>
-            </footer>
+            <article class="article-content">
+                <h3>로또 번호 생성 알고리즘 안내</h3>
+                <p>본 서비스의 로또 번호 생성기는 자바스크립트의 `Math.random()` 함수를 기반으로 1부터 45까지의 숫자 중 중복되지 않는 6개의 숫자를 무작위로 추출합니다. 추가로 보너스 번호 1개를 포함하여 총 7개의 행운 숫자를 제안합니다.</p>
+                <p>많은 분이 선호하는 '번호대별 균형'을 시각적으로 확인하실 수 있도록 번호 구간별로 다른 색상의 공 디자인을 적용하였습니다. (1-10번: 노란색, 11-20번: 파란색, 21-30번: 빨간색, 31-40번: 회색, 41-45번: 녹색)</p>
+            </article>
         </section>
 
         <!-- 음식점 섹션 -->
         <section id="restaurant-section" class="tab-content">
-            <header>
-                <h1>주변 음식점 추천</h1>
-                <p class="subtitle">지도를 움직여 위치를 정하고 음식점을 추천받으세요.</p>
-            </header>
+            <div class="section-header">
+                <h1>내 주변 음식점 랜덤 추천</h1>
+                <p class="subtitle">지도를 움직여 원하는 위치의 맛집을 찾아보세요.</p>
+            </div>
 
             <div id="map-container">
                 <div id="map"></div>
@@ -95,7 +102,7 @@
                 </div>
             </div>
 
-            <button id="recommend-btn">랜덤 추천 받기!</button>
+            <button id="recommend-btn">음식점 랜덤 추천받기</button>
 
             <div id="restaurant-result-container" class="hidden">
                 <div class="result-card">
@@ -105,15 +112,46 @@
                     <a id="place-link" href="#" target="_blank" class="btn-link">상세보기 (카카오맵)</a>
                 </div>
             </div>
-            
-            <footer class="tab-footer">
-                <p>※ 본 서비스는 카카오맵 API를 사용하여 정보를 제공합니다.</p>
-            </footer>
+
+            <article class="article-content">
+                <h3>주변 음식점 추천 서비스 활용 팁</h3>
+                <p>카카오맵 API를 연동하여 실시간 장소 정보를 바탕으로 추천을 진행합니다. 단순히 이름만 보여주는 것이 아니라, 현재 지도 중심에서 설정하신 거리(최대 2km) 내에 있는 실제 영업 중인 장소들을 검색합니다.</p>
+                <p>메뉴 결정이 어려울 때 '음식 종류'를 전체로 설정하고 랜덤 버튼을 눌러보세요. 예상치 못한 새로운 로컬 맛집을 발견할 수 있는 즐거움을 드립니다. 카페 모드 선택 시에는 카카오의 전문 카테고리 그룹 코드를 사용하여 더욱 정확한 검색 결과를 보장합니다.</p>
+            </article>
         </section>
     </div>
+
+    <!-- 정보 섹션 (애드센스 가치 보강용) -->
+    <section id="info-section" class="container info-article-section">
+        <div class="info-card">
+            <h2>사용 가이드 및 주의사항</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h3>로또 번호 추출 시</h3>
+                    <p>본 생성기는 통계적 당첨 확률을 높여주는 도구가 아니며, 단순 무작위 추출기입니다. 도박 중독 예방을 위해 적당한 금액으로 즐기시길 권장합니다.</p>
+                </div>
+                <div class="info-item">
+                    <h3>음식점 정보 오차</h3>
+                    <p>추천된 장소의 영업 시간이나 휴무일 등 상세 정보는 카카오맵 상세페이지에서 다시 한번 확인해 주시기 바랍니다. API 제공 시점에 따라 실제와 차이가 있을 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
-<!-- 카카오맵 API 가이드 표준 방식 (상대 프로토콜 사용) -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-links">
+            <a href="#privacy-policy">개인정보처리방침</a>
+            <a href="#terms">이용약관</a>
+            <a href="#about">사이트 소개</a>
+        </div>
+        <p class="copyright">&copy; 2026 Lucky & Yummy. All rights reserved.</p>
+        <p class="disclaimer">본 서비스는 카카오맵 API 정보를 활용하며, 생성된 로또 번호는 당첨을 보장하지 않습니다.</p>
+    </div>
+</footer>
+
+<!-- 카카오맵 API -->
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ca8418086f72a4cca934db0808557edc&libraries=services"></script>
 <script src="main.js"></script>
 
