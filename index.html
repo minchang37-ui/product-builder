@@ -3,100 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Lotto - 행운의 번호 추출기 & 분석 가이드</title>
-    <meta name="description" content="무작위 로또 번호 생성부터 통계 기반 분석 가이드까지, 행운의 번호를 만나는 가장 스마트한 방법.">
-    <meta name="google-adsense-account" content="ca-pub-9890466279476766">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9890466279476766"
-     crossorigin="anonymous"></script>
+    <title>오늘 뭐 먹지? - 랜덤 맛집 추천</title>
+    <meta name="description" content="카카오맵을 이용해 내 주변 맛집을 랜덤으로 추천받아보세요.">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- 카카오맵 API (서비스 라이브러리 포함) -->
+    <!-- 실제 사용 시 appkey= 뒷부분에 발급받은 자바스크립트 키를 넣어야 합니다. -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_JS_KEY&libraries=services"></script>
 </head>
 <body>
 
 <nav class="navbar">
     <div class="nav-container">
-        <a href="#" class="nav-logo">Lucky Lotto</a>
-        <div class="nav-links">
-            <a href="#generator">추출기</a>
-            <a href="#guide">이용 가이드</a>
-            <a href="#faq">자주 묻는 질문</a>
-            <a href="#privacy">개인정보처리방침</a>
-        </div>
+        <a href="#" class="nav-logo">오늘 뭐 먹지?</a>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">🌙</button>
     </div>
 </nav>
 
 <main class="main-content">
-    <section id="generator" class="container">
+    <section id="map-section" class="container">
         <header>
-            <h1>Lucky Lotto</h1>
-            <p class="subtitle">오늘의 행운을 담은 번호를 추출해 보세요.</p>
+            <h1>주변 맛집 추천</h1>
+            <p class="subtitle">지도를 움직여 위치를 정하고, 조건에 맞는 맛집을 추천받으세요.</p>
         </header>
 
+        <div id="map-container">
+            <div id="map"></div>
+            <div class="map-overlay">
+                <span class="center-marker">📍</span>
+            </div>
+        </div>
+
         <div class="controls">
-            <label for="game-count">추출할 게임 수:</label>
-            <select id="game-count">
-                <option value="1">1게임</option>
-                <option value="2">2게임</option>
-                <option value="3">3게임</option>
-                <option value="4">4게임</option>
-                <option value="5">5게임</option>
-            </select>
+            <div class="control-group">
+                <label for="price-range">금액대</label>
+                <select id="price-range">
+                    <option value="">전체</option>
+                    <option value="가성비">1만원 이하</option>
+                    <option value="적당한">1~2만원</option>
+                    <option value="고급">2만원 이상</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="meal-time">밥시간</label>
+                <select id="meal-time">
+                    <option value="맛집">전체</option>
+                    <option value="아침식사">아침</option>
+                    <option value="점심맛집">점심</option>
+                    <option value="저녁맛집">저녁</option>
+                    <option value="술집">술/야식</option>
+                </select>
+            </div>
         </div>
 
-        <div id="result-container">
-            <!-- 결과가 여기에 동적으로 생성됩니다 -->
-        </div>
+        <button id="recommend-btn">랜덤 추천 받기!</button>
 
-        <button id="generate-btn">번호 생성하기</button>
+        <div id="result-container" class="hidden">
+            <div class="result-card">
+                <h2 id="place-name">가게 이름</h2>
+                <p id="place-category">카테고리</p>
+                <p id="place-address">주소지</p>
+                <a id="place-link" href="#" target="_blank" class="btn-link">상세보기 (카카오맵)</a>
+            </div>
+        </div>
     </section>
 
     <section id="guide" class="info-section">
         <div class="container">
-            <h2>로또 번호 추출 가이드</h2>
+            <h2>사용 방법</h2>
             <div class="info-grid">
                 <div class="info-card">
-                    <h3>무작위 추출 원리</h3>
-                    <p>Lucky Lotto는 최신 난수 생성 알고리즘을 사용하여 1부터 45 사이의 숫자를 완전히 독립적으로 추출합니다. 각 번호가 선택될 확률은 동일합니다.</p>
+                    <h3>1. 위치 선정</h3>
+                    <p>지도를 드래그하여 추천받고 싶은 중심 위치를 정하세요. 현재 위치 버튼을 눌러 내 주변으로 이동할 수 있습니다.</p>
                 </div>
                 <div class="info-card">
-                    <h3>번호 조합 팁</h3>
-                    <p>과거 데이터에 따르면 특정 구간에 번호가 몰리는 것보다 골고루 분포되는 경우가 많습니다. 저희 추출기는 번호를 오름차순으로 정렬하여 가독성을 높였습니다.</p>
+                    <h3>2. 조건 선택</h3>
+                    <p>원하는 금액대와 식사 시간을 선택하세요. 검색 키워드에 반영되어 최적의 장소를 찾아줍니다.</p>
                 </div>
                 <div class="info-card">
-                    <h3>책임감 있는 게임</h3>
-                    <p>로또는 재미로 즐기는 오락입니다. 과도한 몰입은 피하시고, 본인의 경제적 상황에 맞는 소액으로 즐기시길 권장합니다.</p>
+                    <h3>3. 랜덤 추천</h3>
+                    <p>'랜덤 추천 받기' 버튼을 누르면 주변 맛집 중 하나를 골라 상세 정보와 함께 보여드립니다.</p>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="faq" class="info-section alternate-bg">
-        <div class="container">
-            <h2>자주 묻는 질문 (FAQ)</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <h4>Q: 번호 생성에 비용이 드나요?</h4>
-                    <p>A: 아니요, Lucky Lotto의 모든 번호 생성 서비스는 100% 무료로 제공됩니다.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>Q: 추출된 번호로 당첨이 가능한가요?</h4>
-                    <p>A: 본 프로그램은 수학적 확률에 기반한 무작위 생성기입니다. 당첨을 보장하지 않으며, 결과에 대한 책임은 사용자 본인에게 있습니다.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>Q: 모바일에서도 이용 가능한가요?</h4>
-                    <p>A: 네, 반응형 디자인으로 제작되어 스마트폰과 태블릿에서도 최적화된 화면으로 이용하실 수 있습니다.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="privacy" class="info-section">
-        <div class="container">
-            <h2>개인정보처리방침</h2>
-            <div class="privacy-content">
-                <p>Lucky Lotto는 사용자의 어떠한 개인정보도 수집하거나 저장하지 않습니다. 번호 추출 기능은 사용자의 브라우저 내에서 직접 실행되며, 서버로 데이터를 전송하지 않습니다.</p>
-                <p>단, 구글 애드센스와 같은 제3자 광고 서비스는 서비스 최적화를 위해 쿠키를 사용할 수 있습니다. 사용자는 브라우저 설정에서 이를 거부할 수 있습니다.</p>
             </div>
         </div>
     </section>
@@ -104,8 +91,8 @@
 
 <footer class="site-footer">
     <div class="container">
-        <p>&copy; 2026 Lucky Lotto. All rights reserved.</p>
-        <p class="disclaimer">※ 본 사이트는 무작위 번호 생성 서비스이며 실제 복권 당첨을 보장하지 않습니다.</p>
+        <p>&copy; 2026 오늘 뭐 먹지?. All rights reserved.</p>
+        <p class="disclaimer">※ 본 서비스는 카카오맵 API를 사용하여 실시간 정보를 바탕으로 제공됩니다.</p>
     </div>
 </footer>
 
