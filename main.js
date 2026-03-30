@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeCategory = document.getElementById('place-category');
     const placeAddress = document.getElementById('place-address');
     const placeLink = document.getElementById('place-link');
+    const getLocationBtn = document.getElementById('get-location-btn');
 
     // --- Theme Logic ---
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -47,12 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             document.getElementById(`${target}-section`).classList.add('active');
 
-            // 지도 탭 선택 시 레이아웃 재계산 (카카오맵 깨짐 방지)
-            if (target === 'restaurant' && map) {
-                setTimeout(() => {
-                    map.relayout();
-                    if (currentCenter) map.setCenter(currentCenter);
-                }, 100);
+            // 가이드 권장: 레이아웃 재계산 및 중심 좌표 유지
+            if (target === 'restaurant') {
+                if (!map) {
+                    loadKakaoMap(); 
+                } else {
+                    setTimeout(() => {
+                        map.relayout();
+                        if (currentCenter) map.setCenter(currentCenter);
+                    }, 100);
+                }
             }
         });
     });
@@ -118,41 +123,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Kakao Map Logic ---
-    let map;
-    let ps;
-    let currentCenter;
-    const getLocationBtn = document.getElementById('get-location-btn');
+    let map = null;
+    let ps = null;
+    let currentCenter = null;
 
     function initMap() {
         const container = document.getElementById('map');
         if (!container) return;
 
+        // 가이드 Step 3: 지도 생성
         const options = {
             center: new kakao.maps.LatLng(37.5665, 126.9780),
             level: 3
         };
 
-        try {
-            map = new kakao.maps.Map(container, options);
-            
-            if (kakao.maps.services && kakao.maps.services.Places) {
-                ps = new kakao.maps.services.Places();
-            }
+        map = new kakao.maps.Map(container, options);
+        currentCenter = map.getCenter();
 
+        // 가이드 #whatlibrary: 라이브러리 서비스 사용
+        if (kakao.maps.services) {
+            ps = new kakao.maps.services.Places();
+            console.log('Places service initialized.');
+        } else {
+            console.error('Kakao Maps Services library is missing.');
+        }
+
+        // 초기 위치 요청
+        requestMyLocation(false);
+
+        kakao.maps.event.addListener(map, 'center_changed', () => {
             currentCenter = map.getCenter();
+        });
+    }
 
-            // 초기 로딩 시 위치 시도 (자동)
-            requestMyLocation(false);
-
-            kakao.maps.event.addListener(map, 'center_changed', () => {
-                currentCenter = map.getCenter();
+    function loadKakaoMap() {
+        // 가이드 Step 2: autoload=false 일 때 kakao.maps.load 사용
+        if (window.kakao && window.kakao.maps) {
+            kakao.maps.load(() => {
+                initMap();
+                console.log('Kakao Map and Libraries loaded successfully.');
             });
-        } catch (e) {
-            console.error('Map initialization failed:', e);
+        } else {
+            console.warn('Waiting for Kakao Maps SDK script...');
+            setTimeout(loadKakaoMap, 500);
         }
     }
 
+    // 초기 로드 시 시도
+    loadKakaoMap();
+
     function requestMyLocation(showAlert = true) {
+        if (!map) return;
+        
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
                 const lat = position.coords.latitude;
@@ -160,51 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const locPosition = new kakao.maps.LatLng(lat, lon);
                 map.setCenter(locPosition);
                 currentCenter = locPosition;
-                console.log('Location updated to current position.');
             }, (err) => {
-                console.warn('Geolocation failed:', err);
                 if (showAlert) {
-                    let msg = '위치 정보를 가져올 수 없습니다.';
-                    if (err.code === 1) msg = '위치 정보 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.';
-                    else if (err.code === 2) msg = '위치를 확인할 수 없습니다.';
-                    else if (err.code === 3) msg = '응답 시간이 초과되었습니다.';
-                    alert(msg);
+                    alert('위치 권한을 확인해주세요.');
                 }
-            }, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            });
-        } else {
-            if (showAlert) alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.');
+            }, { timeout: 5000 });
         }
     }
 
-    // 내 위치 버튼 클릭 이벤트
     getLocationBtn.addEventListener('click', () => {
         requestMyLocation(true);
     });
 
-    // 카카오맵 SDK 로드 대기
-    function loadKakaoMap() {
-        if (typeof kakao !== 'undefined' && kakao.maps) {
-            kakao.maps.load(() => {
-                initMap();
-                console.log('Kakao Map loaded successfully.');
-            });
-        } else {
-            console.error('Kakao Maps SDK is not found. Check your index.html script tag.');
-            // 2초 후 재시도
-            setTimeout(loadKakaoMap, 2000);
-        }
-    }
-
-    loadKakaoMap();
-
     // --- Restaurant Recommendation Logic ---
     recommendBtn.addEventListener('click', () => {
         if (!ps) {
-            alert('지도가 아직 로드되지 않았습니다.');
+            alert('맛집 검색 서비스를 준비 중입니다. 잠시만 기다려주세요.');
             return;
         }
 
