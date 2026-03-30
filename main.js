@@ -124,33 +124,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initMap() {
         const container = document.getElementById('map');
+        if (!container) return;
+
         const options = {
             center: new kakao.maps.LatLng(37.5665, 126.9780),
             level: 3
         };
 
-        map = new kakao.maps.Map(container, options);
-        ps = new kakao.maps.services.Places();
-        currentCenter = map.getCenter();
+        try {
+            map = new kakao.maps.Map(container, options);
+            
+            // 서비스 라이브러리 체크
+            if (kakao.maps.services && kakao.maps.services.Places) {
+                ps = new kakao.maps.services.Places();
+            } else {
+                console.error('Kakao Maps Services library is not loaded.');
+            }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                const locPosition = new kakao.maps.LatLng(lat, lon);
-                map.setCenter(locPosition);
-                currentCenter = locPosition;
-            });
-        }
-
-        kakao.maps.event.addListener(map, 'center_changed', () => {
             currentCenter = map.getCenter();
-        });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const locPosition = new kakao.maps.LatLng(lat, lon);
+                    map.setCenter(locPosition);
+                    currentCenter = locPosition;
+                }, (err) => {
+                    console.warn('Geolocation failed:', err);
+                });
+            }
+
+            kakao.maps.event.addListener(map, 'center_changed', () => {
+                currentCenter = map.getCenter();
+            });
+        } catch (e) {
+            console.error('Map initialization failed:', e);
+        }
     }
 
-    if (typeof kakao !== 'undefined' && kakao.maps) {
-        initMap();
+    // 카카오맵 SDK 로드 대기
+    function loadKakaoMap() {
+        if (typeof kakao !== 'undefined' && kakao.maps) {
+            kakao.maps.load(() => {
+                initMap();
+                console.log('Kakao Map loaded successfully.');
+            });
+        } else {
+            console.error('Kakao Maps SDK is not found. Check your index.html script tag.');
+            // 2초 후 재시도
+            setTimeout(loadKakaoMap, 2000);
+        }
     }
+
+    loadKakaoMap();
 
     // --- Restaurant Recommendation Logic ---
     recommendBtn.addEventListener('click', () => {
