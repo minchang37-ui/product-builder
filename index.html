@@ -3,98 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘 뭐 먹지? - 랜덤 맛집 추천</title>
-    <meta name="description" content="카카오맵을 이용해 내 주변 맛집을 랜덤으로 추천받아보세요.">
+    <title>Lucky & Yummy - 멀티 도우미</title>
+    <meta name="description" content="행운의 로또 번호 추출과 주변 맛집 추천을 한곳에서!">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <!-- 카카오맵 API (서비스 라이브러리 포함) -->
-    <!-- 실제 사용 시 appkey= 뒷부분에 발급받은 자바스크립트 키를 넣어야 합니다. -->
+    <!-- 카카오맵 API -->
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_JS_KEY&libraries=services"></script>
 </head>
 <body>
 
 <nav class="navbar">
     <div class="nav-container">
-        <a href="#" class="nav-logo">오늘 뭐 먹지?</a>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">🌙</button>
+        <a href="#" class="nav-logo">Lucky & Yummy</a>
+        <div class="nav-right">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">🌙</button>
+        </div>
     </div>
 </nav>
 
 <main class="main-content">
-    <section id="map-section" class="container">
-        <header>
-            <h1>주변 맛집 추천</h1>
-            <p class="subtitle">지도를 움직여 위치를 정하고, 조건에 맞는 맛집을 추천받으세요.</p>
-        </header>
-
-        <div id="map-container">
-            <div id="map"></div>
-            <div class="map-overlay">
-                <span class="center-marker">📍</span>
-            </div>
+    <div class="tab-container container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="lotto">🍀 로또 번호</button>
+            <button class="tab-btn" data-tab="restaurant">🍴 맛집 추천</button>
         </div>
 
-        <div class="controls">
-            <div class="control-group">
-                <label for="price-range">금액대</label>
-                <select id="price-range">
-                    <option value="">전체</option>
-                    <option value="가성비">1만원 이하</option>
-                    <option value="적당한">1~2만원</option>
-                    <option value="고급">2만원 이상</option>
+        <!-- 로또 섹션 -->
+        <section id="lotto-section" class="tab-content active">
+            <header>
+                <h1>Lucky Lotto</h1>
+                <p class="subtitle">행운의 번호 조합을 만들어보세요.</p>
+            </header>
+
+            <div class="controls lotto-controls">
+                <label for="game-count">추출할 게임 수:</label>
+                <select id="game-count">
+                    <option value="1">1게임</option>
+                    <option value="2">2게임</option>
+                    <option value="3">3게임</option>
+                    <option value="4">4게임</option>
+                    <option value="5">5게임</option>
                 </select>
             </div>
-            <div class="control-group">
-                <label for="meal-time">밥시간</label>
-                <select id="meal-time">
-                    <option value="맛집">전체</option>
-                    <option value="아침식사">아침</option>
-                    <option value="점심맛집">점심</option>
-                    <option value="저녁맛집">저녁</option>
-                    <option value="술집">술/야식</option>
-                </select>
+
+            <div id="lotto-result-container">
+                <!-- 로또 결과 동적 생성 -->
             </div>
-        </div>
 
-        <button id="recommend-btn">랜덤 추천 받기!</button>
+            <button id="generate-btn">번호 생성하기</button>
+            
+            <footer class="tab-footer">
+                <p>※ 본 프로그램은 무작위 번호 생성기이며 당첨을 보장하지 않습니다.</p>
+            </footer>
+        </section>
 
-        <div id="result-container" class="hidden">
-            <div class="result-card">
-                <h2 id="place-name">가게 이름</h2>
-                <p id="place-category">카테고리</p>
-                <p id="place-address">주소지</p>
-                <a id="place-link" href="#" target="_blank" class="btn-link">상세보기 (카카오맵)</a>
-            </div>
-        </div>
-    </section>
+        <!-- 맛집 섹션 -->
+        <section id="restaurant-section" class="tab-content">
+            <header>
+                <h1>주변 맛집 추천</h1>
+                <p class="subtitle">지도를 움직여 위치를 정하고 맛집을 추천받으세요.</p>
+            </header>
 
-    <section id="guide" class="info-section">
-        <div class="container">
-            <h2>사용 방법</h2>
-            <div class="info-grid">
-                <div class="info-card">
-                    <h3>1. 위치 선정</h3>
-                    <p>지도를 드래그하여 추천받고 싶은 중심 위치를 정하세요. 현재 위치 버튼을 눌러 내 주변으로 이동할 수 있습니다.</p>
-                </div>
-                <div class="info-card">
-                    <h3>2. 조건 선택</h3>
-                    <p>원하는 금액대와 식사 시간을 선택하세요. 검색 키워드에 반영되어 최적의 장소를 찾아줍니다.</p>
-                </div>
-                <div class="info-card">
-                    <h3>3. 랜덤 추천</h3>
-                    <p>'랜덤 추천 받기' 버튼을 누르면 주변 맛집 중 하나를 골라 상세 정보와 함께 보여드립니다.</p>
+            <div id="map-container">
+                <div id="map"></div>
+                <div class="map-overlay">
+                    <span class="center-marker">📍</span>
                 </div>
             </div>
-        </div>
-    </section>
-</main>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; 2026 오늘 뭐 먹지?. All rights reserved.</p>
-        <p class="disclaimer">※ 본 서비스는 카카오맵 API를 사용하여 실시간 정보를 바탕으로 제공됩니다.</p>
+            <div class="controls restaurant-controls">
+                <div class="control-group">
+                    <label for="price-range">금액대</label>
+                    <select id="price-range">
+                        <option value="">전체</option>
+                        <option value="가성비">1만원 이하</option>
+                        <option value="적당한">1~2만원</option>
+                        <option value="고급">2만원 이상</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="meal-time">밥시간</label>
+                    <select id="meal-time">
+                        <option value="맛집">전체</option>
+                        <option value="아침식사">아침</option>
+                        <option value="점심맛집">점심</option>
+                        <option value="저녁맛집">저녁</option>
+                        <option value="술집">술/야식</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="recommend-btn">랜덤 추천 받기!</button>
+
+            <div id="restaurant-result-container" class="hidden">
+                <div class="result-card">
+                    <h2 id="place-name">가게 이름</h2>
+                    <p id="place-category">카테고리</p>
+                    <p id="place-address">주소지</p>
+                    <a id="place-link" href="#" target="_blank" class="btn-link">상세보기 (카카오맵)</a>
+                </div>
+            </div>
+            
+            <footer class="tab-footer">
+                <p>※ 본 서비스는 카카오맵 API를 사용하여 정보를 제공합니다.</p>
+            </footer>
+        </section>
     </div>
-</footer>
+</main>
 
 <script src="main.js"></script>
 
