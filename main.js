@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let map;
     let ps;
     let currentCenter;
+    const getLocationBtn = document.getElementById('get-location-btn');
 
     function initMap() {
         const container = document.getElementById('map');
@@ -134,26 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             map = new kakao.maps.Map(container, options);
             
-            // 서비스 라이브러리 체크
             if (kakao.maps.services && kakao.maps.services.Places) {
                 ps = new kakao.maps.services.Places();
-            } else {
-                console.error('Kakao Maps Services library is not loaded.');
             }
 
             currentCenter = map.getCenter();
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const locPosition = new kakao.maps.LatLng(lat, lon);
-                    map.setCenter(locPosition);
-                    currentCenter = locPosition;
-                }, (err) => {
-                    console.warn('Geolocation failed:', err);
-                });
-            }
+            // 초기 로딩 시 위치 시도 (자동)
+            requestMyLocation(false);
 
             kakao.maps.event.addListener(map, 'center_changed', () => {
                 currentCenter = map.getCenter();
@@ -162,6 +151,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Map initialization failed:', e);
         }
     }
+
+    function requestMyLocation(showAlert = true) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const locPosition = new kakao.maps.LatLng(lat, lon);
+                map.setCenter(locPosition);
+                currentCenter = locPosition;
+                console.log('Location updated to current position.');
+            }, (err) => {
+                console.warn('Geolocation failed:', err);
+                if (showAlert) {
+                    let msg = '위치 정보를 가져올 수 없습니다.';
+                    if (err.code === 1) msg = '위치 정보 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.';
+                    else if (err.code === 2) msg = '위치를 확인할 수 없습니다.';
+                    else if (err.code === 3) msg = '응답 시간이 초과되었습니다.';
+                    alert(msg);
+                }
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        } else {
+            if (showAlert) alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.');
+        }
+    }
+
+    // 내 위치 버튼 클릭 이벤트
+    getLocationBtn.addEventListener('click', () => {
+        requestMyLocation(true);
+    });
 
     // 카카오맵 SDK 로드 대기
     function loadKakaoMap() {
