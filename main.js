@@ -146,19 +146,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyword = `${price} ${time}`.trim() || '맛집';
         const center = map.getCenter();
         
+        console.log(`검색 시작! 키워드: "${keyword}", 좌표: ${center.toString()}`);
+
         const searchOptions = {
             location: center,
-            radius: 1000,
+            radius: 2000, // 범위를 2km로 확장하여 더 많은 결과를 찾음
             sort: kakao.maps.services.SortBy.DISTANCE
         };
 
         ps.keywordSearch(keyword, (data, status) => {
+            // 디버깅을 위해 결과 리스트를 콘솔에 출력
+            console.log('검색 상태:', status);
+            console.log('검색 결과 리스트:', data);
+
             if (status === kakao.maps.services.Status.OK) {
+                console.log(`총 ${data.length}개의 맛집을 찾았습니다.`);
                 const randomIndex = Math.floor(Math.random() * data.length);
                 const place = data[randomIndex];
                 displayResult(place);
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                alert(`"${keyword}" 조건에 맞는 장소를 찾지 못했습니다. 금액대나 시간을 '전체'로 설정하고 다시 시도해보세요.`);
             } else {
-                alert('주변에 조건에 맞는 맛집이 없습니다.');
+                alert('검색 중 오류가 발생했습니다.');
             }
         }, searchOptions);
     });
